@@ -49,11 +49,11 @@ pub async fn download_apps(
             async move {
                 let app_string = match app_version {
                     Some(ref version) => {
-                        mp_log.suspend(|| println!("Downloading {} version {}...", app_id, version));
+                        println!("Downloading {} version {}...", app_id, version);
                         format!("{}@{}", app_id, version)
                     },
                     None => {
-                        mp_log.suspend(|| println!("Downloading {}...", app_id));
+                        println!("Downloading {}...", app_id);
                         app_id.to_string()
                     },
                 };
@@ -101,23 +101,23 @@ async fn download_from_response(response: Response, re: Box<dyn Deref<Target=Reg
                             };
 
                             match dl.download(&cb).await {
-                                Ok(_) => mp_log.suspend(|| println!("{} downloaded successfully!", app_string)),
+                                Ok(_) => println!("{} downloaded successfully!", app_string),
                                 Err(err) if matches!(err.kind(), TDSTDErrorKind::FileExists) => {
-                                    mp_log.println(format!("File already exists for {}. Skipping...", app_string)).unwrap();
+                                    println!("File already exists for {}. Skipping...", app_string);
                                 },
                                 Err(err) if matches!(err.kind(), TDSTDErrorKind::PermissionDenied) => {
-                                    mp_log.println(format!("Permission denied when attempting to write file for {}. Skipping...", app_string)).unwrap();
+                                    println!("Permission denied when attempting to write file for {}. Skipping...", app_string);
                                 },
                                 Err(_) => {
-                                    mp_log.println(format!("An error has occurred attempting to download {}.  Retry #1...", app_string)).unwrap();
+                                    println!("An error has occurred attempting to download {}.  Retry #1...", app_string);
                                     match AsyncDownload::new(download_url, Path::new(outpath), &fname).download(&cb).await {
-                                        Ok(_) => mp_log.suspend(|| println!("{} downloaded successfully!", app_string)),
+                                        Ok(_) => println!("{} downloaded successfully!", app_string),
                                         Err(_) => {
-                                            mp_log.println(format!("An error has occurred attempting to download {}.  Retry #2...", app_string)).unwrap();
+                                            println(format!("An error has occurred attempting to download {}.  Retry #2...", app_string)).unwrap();
                                             match AsyncDownload::new(download_url, Path::new(outpath), &fname).download(&cb).await {
-                                                Ok(_) => mp_log.suspend(|| println!("{} downloaded successfully!", app_string)),
+                                                Ok(_) => println!("{} downloaded successfully!", app_string),
                                                 Err(_) => {
-                                                    mp_log.println(format!("An error has occurred attempting to download {}. Skipping...", app_string)).unwrap();
+                                                    format!("An error has occurred attempting to download {}. Skipping...", app_string).unwrap();
                                                 }
                                             }
                                         }
@@ -126,18 +126,18 @@ async fn download_from_response(response: Response, re: Box<dyn Deref<Target=Reg
                             }
                         },
                         Err(_) => {
-                            mp_log.println(format!("Invalid response for {}. Skipping...", app_string)).unwrap();
+                            println(format!("Invalid response for {}. Skipping...", app_string));
                         }
                     }
                 },
                 _ => {
-                    mp_log.println(format!("Could not get download URL for {}. Skipping...", app_string)).unwrap();
+                    println!("Could not get download URL for {}. Skipping...", app_string);
                 }
             }
 
         },
-        _ => {
-            mp_log.println(format!("Invalid app response for {}. Skipping...", app_string)).unwrap();
+        err => {
+            println!("Invalid app response for {}. {}", app_string, err);
         }
     }
 }
