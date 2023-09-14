@@ -89,38 +89,38 @@ async fn download_from_response(response: Response, re: Box<dyn Deref<Target=Reg
                         "XAPKJ" => format!("{}.xapk", app_string),
                         _ => format!("{}.apk", app_string),
                     };
-
-                    match AsyncDownload::new(download_url, Path::new(outpath), &fname).get().await {
-                        Ok(mut dl) => {
-                            let length = dl.length();
-                            let cb = match length {
-                                Some(length) => Some(progress_wrapper(mp)(fname.clone(), length)),
-                                None => None,
-                            };
-
-                            match dl.download(&cb).await {
-                                Ok(_) => println!("{} downloaded successfully!", app_string),
-                                Err(err) if matches!(err.kind(), TDSTDErrorKind::FileExists) => {
-                                    println!("File already exists for {}. Skipping...", app_string);
-                                },
-                                Err(err) if matches!(err.kind(), TDSTDErrorKind::PermissionDenied) => {
-                                    println!("Permission denied when attempting to write file for {}. Skipping...", app_string);
-                                },
-                                Err(_) => {
-                                    println!("An error has occurred attempting to download {}.  Retry #1...", app_string);
-                                    match AsyncDownload::new(download_url, Path::new(outpath), &fname).download(&cb).await {
-                                        Ok(_) => println!("{} downloaded successfully!", app_string),
-                                        Err(_) => {
-                                            println!("An error has occurred attempting to download {}.  Skipping...", app_string);
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        Err(err) => {
-                            println!("Invalid response for {}. {}", app_string, err);
-                        }
-                    }
+                    println!("{}", download_url);
+//                     match AsyncDownload::new(download_url, Path::new(outpath), &fname).get().await {
+//                         Ok(mut dl) => {
+//                             let length = dl.length();
+//                             let cb = match length {
+//                                 Some(length) => Some(progress_wrapper(mp)(fname.clone(), length)),
+//                                 None => None,
+//                             };
+//
+//                             match dl.download(&cb).await {
+//                                 Ok(_) => println!("{} downloaded successfully!", app_string),
+//                                 Err(err) if matches!(err.kind(), TDSTDErrorKind::FileExists) => {
+//                                     println!("File already exists for {}. Skipping...", app_string);
+//                                 },
+//                                 Err(err) if matches!(err.kind(), TDSTDErrorKind::PermissionDenied) => {
+//                                     println!("Permission denied when attempting to write file for {}. Skipping...", app_string);
+//                                 },
+//                                 Err(_) => {
+//                                     println!("An error has occurred attempting to download {}.  Retry #1...", app_string);
+//                                     match AsyncDownload::new(download_url, Path::new(outpath), &fname).download(&cb).await {
+//                                         Ok(_) => println!("{} downloaded successfully!", app_string),
+//                                         Err(_) => {
+//                                             println!("An error has occurred attempting to download {}.  Skipping...", app_string);
+//                                         }
+//                                     }
+//                                 }
+//                             }
+//                         },
+//                         Err(err) => {
+//                             println!("Invalid response for {}. {}", app_string, err);
+//                         }
+//                     }
                 },
                 _ => {
                     println!("Could not get download URL for {}. Skipping...", app_string);
